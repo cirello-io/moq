@@ -4,7 +4,7 @@ import (
 	"go/types"
 	"testing"
 
-	"github.com/matryer/moq/internal/registry"
+	"cirello.io/moq/internal/registry"
 )
 
 func TestTemplateFuncs(t *testing.T) {

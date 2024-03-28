@@ -8,8 +8,8 @@ import (
 	"io"
 	"strings"
 
-	"github.com/matryer/moq/internal/registry"
-	"github.com/matryer/moq/internal/template"
+	"cirello.io/moq/internal/registry"
+	"cirello.io/moq/internal/template"
 )
 
 // Mocker can generate mock structs.

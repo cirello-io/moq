@@ -1,4 +1,4 @@
-module github.com/matryer/moq/pkg/moq/testpackages/vendoring
+module cirello.io/moq/pkg/moq/testpackages/vendoring
 
 go 1.14
 

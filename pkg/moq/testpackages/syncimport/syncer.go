@@ -3,7 +3,7 @@ package syncimport
 import (
 	stdsync "sync"
 
-	"github.com/matryer/moq/pkg/moq/testpackages/syncimport/sync"
+	"cirello.io/moq/pkg/moq/testpackages/syncimport/sync"
 )
 
 type Syncer interface {

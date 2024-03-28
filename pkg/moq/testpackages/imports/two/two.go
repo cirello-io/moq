@@ -1,7 +1,7 @@
 package two
 
 import (
-	"github.com/matryer/moq/pkg/moq/testpackages/imports/one"
+	"cirello.io/moq/pkg/moq/testpackages/imports/one"
 )
 
 // DoSomething does something.

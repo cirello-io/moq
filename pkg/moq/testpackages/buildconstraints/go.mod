@@ -1,4 +1,4 @@
-module github.com/matryer/moq/pkg/moq/testpackages/buildconstraints
+module cirello.io/moq/pkg/moq/testpackages/buildconstraints
 
 go 1.14
 

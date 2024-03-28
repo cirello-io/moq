@@ -65,13 +65,13 @@ func varName(vr *types.Var, suffix string) string {
 // information.
 //
 // Examples:
-// - string -> s
-// - int -> n
-// - chan int -> intCh
-// - []a.MyType -> myTypes
-// - map[string]int -> stringToInt
-// - error -> err
-// - a.MyType -> myType
+//   - string -> s
+//   - int -> n
+//   - chan int -> intCh
+//   - []a.MyType -> myTypes
+//   - map[string]int -> stringToInt
+//   - error -> err
+//   - a.MyType -> myType
 func varNameForType(t types.Type) string {
 	nestedType := func(t types.Type) string {
 		if t, ok := t.(*types.Basic); ok {

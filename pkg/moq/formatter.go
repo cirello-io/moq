@@ -15,7 +15,7 @@ func goimports(src []byte) ([]byte, error) {
 		Fragment:  true,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("goimports: %s", err)
+		return nil, fmt.Errorf("goimports: %w", err)
 	}
 
 	return formatted, nil
@@ -24,7 +24,7 @@ func goimports(src []byte) ([]byte, error) {
 func gofmt(src []byte) ([]byte, error) {
 	formatted, err := format.Source(src)
 	if err != nil {
-		return nil, fmt.Errorf("go/format: %s", err)
+		return nil, fmt.Errorf("go/format: %w", err)
 	}
 
 	return formatted, nil

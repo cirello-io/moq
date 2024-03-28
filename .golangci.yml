@@ -1,0 +1,103 @@
+run:
+  modules-download-mode: readonly
+  timeout: 10m
+  skip-files:
+    - ".*\\.gen\\.go$"
+    - ".*_gen\\.go$"
+  build-tags:
+    - debug
+
+linters:
+  disable-all: true
+  fast: true
+  enable:
+    - bodyclose
+    - dupword
+    - errname
+    - errorlint
+    - exportloopref
+    # - gochecknoglobals
+    - godot
+    - gofmt
+    - gosec
+    - gosimple
+    - govet
+    - importas
+    - ineffassign
+    - loggercheck
+    - nestif
+    - nilerr
+    - nilnil
+    - noctx
+    - prealloc
+    - predeclared
+    - reassign
+    - revive
+    - tenv
+    - testableexamples
+    - thelper
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+
+linters-settings:
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: cirello.io/moq
+  govet:
+    check-shadowing: true
+  revive:
+    rules:
+      - name: context-keys-type
+      - name: time-equal
+      - name: time-naming
+      - name: var-declaration
+      - name: unexported-return
+      - name: errorf
+      - name: blank-imports
+      - name: context-as-argument
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+      - name: var-naming
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: indent-error-flow
+      - name: empty-block
+      - name: superfluous-else
+      - name: confusing-naming
+      - name: get-return
+      - name: deep-exit
+      - name: unused-parameter
+      - name: unreachable-code
+      - name: struct-tag
+      - name: range-val-address
+      - name: waitgroup-by-value
+      - name: atomic
+      - name: empty-lines
+      - name: duplicated-imports
+      - name: import-shadowing
+      - name: unused-receiver
+      - name: unhandled-error
+        arguments: ["fmt\\.Print.*","io\\.Copy"]
+      - name: string-of-int
+      - name: early-return
+      - name: defer
+      - name: unexported-naming
+      - name: useless-break
+      - name: optimize-operands-order
+      - name: use-any
+      - name: datarace
+      - name: comment-spacings
+
+
+issues:
+  exclude-rules:
+    - source: "^//go:generate "
+      linters:
+        - gofmt

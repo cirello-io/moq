@@ -1,6 +1,6 @@
 package genericreturn
 
-import "github.com/matryer/moq/pkg/moq/testpackages/genericreturn/otherpackage"
+import "cirello.io/moq/pkg/moq/testpackages/genericreturn/otherpackage"
 
 type GenericBar[T any] struct {
 	Bar T

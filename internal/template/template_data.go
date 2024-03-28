@@ -5,7 +5,7 @@ import (
 	"go/types"
 	"strings"
 
-	"github.com/matryer/moq/internal/registry"
+	"cirello.io/moq/internal/registry"
 )
 
 // Data is the template data used to render the Moq template.
@@ -58,7 +58,7 @@ func (m MethodData) ArgList() string {
 
 // ArgCallList is the string representation of method call parameters,
 // ex: 's, n, foo'. In case of a last variadic parameter, it will be of
-// the format 's, n, foos...'
+// the format 's, n, foos...'.
 func (m MethodData) ArgCallList() string {
 	params := make([]string, len(m.Params))
 	for i, p := range m.Params {

@@ -1,9 +1,9 @@
-module github.com/matryer/moq
+module cirello.io/moq
 
-go 1.18
+go 1.22
 
 require (
-	github.com/pmezard/go-difflib v1.0.0
+	github.com/google/go-cmp v0.6.0
 	golang.org/x/tools v0.17.0
 )
 

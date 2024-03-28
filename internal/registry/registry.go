@@ -31,7 +31,7 @@ func New(srcDir, moqPkg string) (*Registry, error) {
 		srcDir, packages.NeedName|packages.NeedSyntax|packages.NeedTypes,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't load source package: %s", err)
+		return nil, fmt.Errorf("couldn't load source package: %w", err)
 	}
 
 	return &Registry{
@@ -171,7 +171,8 @@ func pkgInfoFromPath(srcDir string, mode packages.LoadMode) (*packages.Package, 
 		if len(errs) == 1 {
 			return nil, errs[0]
 		}
-		return nil, fmt.Errorf("%s (and %d more errors)", errs[0], len(errs)-1)
+		msg := fmt.Sprintf("%s (and %d more errors)", errs[0], len(errs)-1)
+		return nil, errors.New(msg)
 	}
 	return pkgs[0], nil
 }

@@ -2,20 +2,17 @@ package moq
 
 import (
 	"bytes"
-	"flag"
+	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/pmezard/go-difflib/difflib"
+	"github.com/google/go-cmp/cmp"
 )
-
-var update = flag.Bool("update", false, "Update golden files.")
 
 func TestMoq(t *testing.T) {
 	m, err := New(Config{SrcDir: "testpackages/example"})
@@ -284,7 +281,7 @@ func TestImports(t *testing.T) {
 	s := buf.String()
 	strs := []string{
 		`	"sync"`,
-		`	"github.com/matryer/moq/pkg/moq/testpackages/imports/one"`,
+		`	"cirello.io/moq/pkg/moq/testpackages/imports/one"`,
 	}
 	for _, str := range strs {
 		if !strings.Contains(s, str) {
@@ -458,40 +455,15 @@ func TestFormatter(t *testing.T) {
 }
 
 func matchGoldenFile(goldenFile string, actual []byte) error {
-	// To update golden files, run the following:
-	// go test -v -run '^<Test-Name>$' github.com/matryer/moq/pkg/moq -update
-	if *update {
-		if err := os.MkdirAll(filepath.Dir(goldenFile), 0o750); err != nil {
-			return fmt.Errorf("create dir: %s", err)
-		}
-		if err := ioutil.WriteFile(goldenFile, actual, 0o600); err != nil {
-			return fmt.Errorf("write: %s", err)
-		}
-
-		return nil
-	}
-
-	expected, err := ioutil.ReadFile(goldenFile)
+	expected, err := os.ReadFile(goldenFile)
 	if err != nil {
-		return fmt.Errorf("read: %s: %s", goldenFile, err)
+		return fmt.Errorf("read: %s: %w", goldenFile, err)
 	}
-
-	// Normalise newlines
 	actual, expected = normalize(actual), normalize(expected)
 	if !bytes.Equal(expected, actual) {
-		diff, err := difflib.GetUnifiedDiffString(difflib.UnifiedDiff{
-			A:        difflib.SplitLines(string(expected)),
-			B:        difflib.SplitLines(string(actual)),
-			FromFile: "Expected",
-			ToFile:   "Actual",
-			Context:  1,
-		})
-		if err != nil {
-			return fmt.Errorf("diff: %s", err)
-		}
+		diff := cmp.Diff(string(expected), string(actual))
 		return fmt.Errorf("match: %s:\n%s", goldenFile, diff)
 	}
-
 	return nil
 }
 
@@ -540,7 +512,7 @@ func TestVendoredInterface(t *testing.T) {
 			t.Errorf("expected but missing: \"%s\"", str)
 		}
 	}
-	incorrectImport := `"github.com/matryer/moq/pkg/moq/testpackages/vendoring/vendor/github.com/sudo-suhas/moq-test-pkgs/somerepo"`
+	incorrectImport := `"cirello.io/moq/pkg/moq/testpackages/vendoring/vendor/github.com/sudo-suhas/moq-test-pkgs/somerepo"`
 	if strings.Contains(s, incorrectImport) {
 		t.Errorf("unexpected import: %s", incorrectImport)
 	}
@@ -579,9 +551,8 @@ func TestDotImports(t *testing.T) {
 		t.Errorf("Chdir: %s", err)
 	}
 	defer func() {
-		err := os.Chdir(preDir)
-		if err != nil {
-			t.Errorf("Chdir back: %s", err)
+		if errChDir := os.Chdir(preDir); err != nil {
+			t.Errorf("Chdir back: %s", errChDir)
 		}
 	}()
 	m, err := New(Config{SrcDir: ".", PkgName: "moqtest_test"})
@@ -628,11 +599,12 @@ func TestGoGenerateVendoredPackages(t *testing.T) {
 		t.Errorf("Start: %s", err)
 	}
 	buf := bytes.NewBuffer(nil)
-	io.Copy(buf, stdout)
+	_, _ = io.Copy(buf, stdout)
 	err = cmd.Wait()
 	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			t.Errorf("Wait: %s %s", exitErr, string(exitErr.Stderr))
+		errExit := &exec.ExitError{}
+		if errors.As(err, &errExit) {
+			t.Errorf("Wait: %s %s", errExit, string(errExit.Stderr))
 		} else {
 			t.Errorf("Wait: %s", err)
 		}
@@ -689,12 +661,12 @@ func TestMockError(t *testing.T) {
 		{
 			name:     "UnexpectedType",
 			namePair: "Person",
-			wantErr:  "Person (github.com/matryer/moq/pkg/moq/testpackages/example.Person) is not an interface",
+			wantErr:  "Person (cirello.io/moq/pkg/moq/testpackages/example.Person) is not an interface",
 		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := m.Mock(ioutil.Discard, tc.namePair)
+			err := m.Mock(io.Discard, tc.namePair)
 			if err == nil {
 				t.Errorf("expected error but got nil")
 				return
@@ -706,8 +678,7 @@ func TestMockError(t *testing.T) {
 	}
 }
 
-// normalize normalizes \r\n (windows) and \r (mac)
-// into \n (unix)
+// normalize normalizes \r\n (windows) and \r (mac) into \n (unix).
 func normalize(d []byte) []byte {
 	// Source: https://www.programming-books.io/essential/go/normalize-newlines-1d3abcf6f17c4186bb9617fa14074e48
 	// replace CR LF \r\n (windows) with LF \n (unix)

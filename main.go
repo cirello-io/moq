@@ -6,15 +6,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
-	"github.com/matryer/moq/pkg/moq"
+	"cirello.io/moq/pkg/moq"
 )
 
-// Version is the command version, injected at build time.
-var Version string = "dev"
+const Version string = "dev"
 
 type userFlags struct {
 	outFile    string
@@ -57,7 +55,7 @@ func main() {
 	}
 
 	if err := run(flags); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -109,5 +107,5 @@ func run(flags userFlags) error {
 		return err
 	}
 
-	return ioutil.WriteFile(flags.outFile, buf.Bytes(), 0o600)
+	return os.WriteFile(flags.outFile, buf.Bytes(), 0o600)
 }

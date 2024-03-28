@@ -1,30 +1,20 @@
-![moq logo](moq-logo-small.png) [![build](https://github.com/matryer/moq/workflows/build/badge.svg)](https://github.com/matryer/moq/actions?query=branch%3Amaster) [![Go Report Card](https://goreportcard.com/badge/github.com/matryer/moq)](https://goreportcard.com/report/github.com/matryer/moq)
-
 Interface mocking tool for go generate.
 
 ### What is Moq?
 
+Originally by https://github.com/matryer/moq (Mat Ryer and David Hernandez).
+
 Moq is a tool that generates a struct from any interface. The struct can be used in test code as a mock of the interface.
 
-![Preview](preview.png)
+Refer to `example/` for basic usage.
 
-above: Moq generates the code on the right.
+This fork modernize the source code and improve some of its ergonomics. Hopefully, some of these changes will later be merged upstream.
 
-You can read more in the [Meet Moq blog post](http://bit.ly/meetmoq).
-
-### Installing
-
-To start using latest released version of Moq, just run:
-
-```
-$ go install github.com/matryer/moq@latest
-```
-
-Note that Go 1.18+ is needed for installing from source. For using Moq with
-older Go versions, use the pre-built binaries published with 
-[Moq releases](https://github.com/matryer/moq/releases). 
+This repository is covered by this [SLA](https://github.com/cirello-io/sla/blob/master/doc.go). If I decide to deprecate this package, I will do maintain for 3 months before archiving it.
 
 ### Usage
+
+You can use straight from the repository. Minimum required version is Go 1.22+.
 
 ```
 moq [flags] source-dir interface [interface2 [interface3 [...]]]
@@ -53,18 +43,13 @@ Ex: moq -pkg different . MyInterface:MyMock
 **NOTE:** `source-dir` is the directory where the source code (definition) of the target interface is located.
 It needs to be a path to a directory and not the import statement for a Go package.
 
-In a command line:
-
-```
-$ moq -out mocks_test.go . MyInterface
-```
 
 In code (for go generate):
 
 ```go
 package my
 
-//go:generate moq -out myinterface_moq_test.go . MyInterface
+//go:generate go run cirello.io/moq -out myinterface_moq_test.go . MyInterface
 
 type MyInterface interface {
 	Method1() error
@@ -133,5 +118,4 @@ The Moq project (and all code) is licensed under the [MIT License](LICENSE).
 
 Moq was created by [Mat Ryer](https://twitter.com/matryer) and [David Hernandez](https://github.com/dahernan), with ideas lovingly stolen from [Ernesto Jimenez](https://github.com/ernesto-jimenez). Featuring a major refactor by @sudo-suhas, as well as lots of other contributors.
 
-The Moq logo was created by [Chris Ryer](http://chrisryer.co.uk) and is licensed under the [Creative Commons Attribution 3.0 License](https://creativecommons.org/licenses/by/3.0/).
-
+The Moq logo was created by [Chris Ryer](http://chrisryer.co.uk) and is licensed under the [Creative Commons Attribution 3.0 License](https://creativecommons.org/licenses/by/3.0/) - not used in this fork so to preserve rights.

@@ -1,58 +1,58 @@
-// +build go1.11
-
 package moq
 
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
 
-// copy copies srcPath to destPath, dirs and files
-func copy(srcPath, destPath string, item os.FileInfo) error {
+func copyFile(srcPath, destPath string, item os.FileInfo) error {
 	if item.IsDir() {
 		if err := os.MkdirAll(destPath, os.FileMode(0750)); err != nil {
 			return err
 		}
-		items, err := ioutil.ReadDir(srcPath)
+		items, err := os.ReadDir(srcPath)
 		if err != nil {
 			return err
 		}
 		for _, item := range items {
 			src := filepath.Join(srcPath, item.Name())
 			dest := filepath.Join(destPath, item.Name())
-			if err := copy(src, dest, item); err != nil {
+			info, err := item.Info()
+			if err != nil {
+				return err
+			}
+			if err := copyFile(src, dest, info); err != nil {
 				return err
 			}
 		}
-	} else {
-		src, err := os.Open(srcPath)
-		if err != nil {
-			return err
-		}
-		defer src.Close()
+		return nil
+	}
+	src, err := os.Open(srcPath)
+	if err != nil {
+		return err
+	}
+	defer src.Close()
 
-		dest, err := os.Create(destPath)
-		if err != nil {
-			return err
-		}
-		defer dest.Close()
+	dest, err := os.Create(destPath)
+	if err != nil {
+		return err
+	}
+	defer dest.Close()
 
-		_, err = io.Copy(dest, src)
-		if err != nil {
-			return err
-		}
+	_, err = io.Copy(dest, src)
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
-// copyTestPackage copies test package to a temporary directory
+// copyTestPackage copies test package to a temporary directory.
 func copyTestPackage(srcPath string) (string, error) {
-	tmpDir, err := ioutil.TempDir("", "moq-tests")
+	tmpDir, err := os.MkdirTemp("", "moq-tests")
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +61,7 @@ func copyTestPackage(srcPath string) (string, error) {
 	if err != nil {
 		return tmpDir, err
 	}
-	return tmpDir, copy(srcPath, tmpDir, info)
+	return tmpDir, copyFile(srcPath, tmpDir, info)
 }
 
 func TestModulesSamePackage(t *testing.T) {
