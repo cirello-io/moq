@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"cirello.io/moq/pkg/moq"
+	"cirello.io/moq/internal/moq"
 )
 
 func init() {
