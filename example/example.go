@@ -2,7 +2,7 @@ package example
 
 import "context"
 
-//go:generate moq -out mockpersonstore_test.go . PersonStore
+//go:generate go run cirello.io/moq -out mockpersonstore_test.go . PersonStore
 
 // Person represents a real person.
 type Person struct {

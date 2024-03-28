@@ -13,25 +13,25 @@ var _ MyInterface = &MyInterfaceMock{}
 
 // MyInterfaceMock is a mock implementation of MyInterface.
 //
-// 	func TestSomethingThatUsesMyInterface(t *testing.T) {
+//	func TestSomethingThatUsesMyInterface(t *testing.T) {
 //
-// 		// make and configure a mocked MyInterface
-// 		mockedMyInterface := &MyInterfaceMock{
-// 			OneFunc: func() bool {
-// 				panic("mock out the One method")
-// 			},
-// 			ThreeFunc: func() string {
-// 				panic("mock out the Three method")
-// 			},
-// 			TwoFunc: func() int {
-// 				panic("mock out the Two method")
-// 			},
-// 		}
+//		// make and configure a mocked MyInterface
+//		mockedMyInterface := &MyInterfaceMock{
+//			OneFunc: func() bool {
+//				panic("mock out the One method")
+//			},
+//			ThreeFunc: func() string {
+//				panic("mock out the Three method")
+//			},
+//			TwoFunc: func() int {
+//				panic("mock out the Two method")
+//			},
+//		}
 //
-// 		// use mockedMyInterface in code that requires MyInterface
-// 		// and then make assertions.
+//		// use mockedMyInterface in code that requires MyInterface
+//		// and then make assertions.
 //
-// 	}
+//	}
 type MyInterfaceMock struct {
 	// OneFunc mocks the One method.
 	OneFunc func() bool
@@ -74,7 +74,8 @@ func (mock *MyInterfaceMock) One() bool {
 
 // OneCalls gets all the calls that were made to One.
 // Check the length with:
-//     len(mockedMyInterface.OneCalls())
+//
+//	len(mockedMyInterface.OneCalls())
 func (mock *MyInterfaceMock) OneCalls() []struct {
 } {
 	var calls []struct {
@@ -100,7 +101,8 @@ func (mock *MyInterfaceMock) Three() string {
 
 // ThreeCalls gets all the calls that were made to Three.
 // Check the length with:
-//     len(mockedMyInterface.ThreeCalls())
+//
+//	len(mockedMyInterface.ThreeCalls())
 func (mock *MyInterfaceMock) ThreeCalls() []struct {
 } {
 	var calls []struct {
@@ -126,7 +128,8 @@ func (mock *MyInterfaceMock) Two() int {
 
 // TwoCalls gets all the calls that were made to Two.
 // Check the length with:
-//     len(mockedMyInterface.TwoCalls())
+//
+//	len(mockedMyInterface.TwoCalls())
 func (mock *MyInterfaceMock) TwoCalls() []struct {
 } {
 	var calls []struct {
