@@ -12,6 +12,16 @@ import (
 	"cirello.io/moq/pkg/moq"
 )
 
+func init() {
+	// Necessary hack to get `go/type` to report type aliases
+	godebug := os.Getenv("GODEBUG")
+	if godebug == "" {
+		godebug += ","
+	}
+	godebug += "gotypesalias=1"
+	_ = os.Setenv("GODEBUG", godebug)
+}
+
 const Version string = "dev"
 
 type userFlags struct {

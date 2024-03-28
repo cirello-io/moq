@@ -14,6 +14,16 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+func init() {
+	// Necessary hack to get `go/type` to report type aliases
+	godebug := os.Getenv("GODEBUG")
+	if godebug == "" {
+		godebug += ","
+	}
+	godebug += "gotypesalias=1"
+	_ = os.Setenv("GODEBUG", godebug)
+}
+
 func TestMoq(t *testing.T) {
 	m, err := New(Config{SrcDir: "testpackages/example"})
 	if err != nil {
@@ -404,6 +414,12 @@ func TestMockGolden(t *testing.T) {
 			interfaces: []string{"ResetStore"},
 			goldenFile: filepath.Join("testpackages/withresets", "withresets_moq.golden.go"),
 		},
+		{
+			name:       "TypeAlias",
+			cfg:        Config{SrcDir: "testpackages/typealias", WithResets: false},
+			interfaces: []string{"Doer"},
+			goldenFile: filepath.Join("testpackages/typealias", "typealias_moq.golden.go"),
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -686,4 +702,30 @@ func normalize(d []byte) []byte {
 	// replace CF \r (mac) with LF \n (unix)
 	d = bytes.Replace(d, []byte{13}, []byte{10}, -1)
 	return d
+}
+
+func TestTypeAlias(t *testing.T) {
+	m, err := New(Config{SrcDir: "testpackages/typealias"})
+	if err != nil {
+		t.Fatalf("moq.New: %s", err)
+	}
+	var buf bytes.Buffer
+	err = m.Mock(&buf, "Doer")
+	if err != nil {
+		t.Errorf("m.Mock: %s", err)
+	}
+	s := buf.String()
+	strs := []string{
+		"package typealias",
+		"type DoerMock struct",
+		"DoFunc func(v AliasToA)",
+	}
+	for _, str := range strs {
+		if !strings.Contains(s, str) {
+			t.Errorf("expected but missing: \"%s\"", str)
+		}
+	}
+	if t.Failed() {
+		t.Log(s)
+	}
 }
