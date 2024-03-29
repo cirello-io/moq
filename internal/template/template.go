@@ -15,13 +15,9 @@ type Template struct {
 }
 
 // New returns a new instance of Template.
-func New() (Template, error) {
-	tmpl, err := template.New("moq").Funcs(templateFuncs).Parse(moqTemplate)
-	if err != nil {
-		return Template{}, err
-	}
-
-	return Template{tmpl: tmpl}, nil
+func New() Template {
+	tmpl := template.Must(template.New("moq").Funcs(templateFuncs).Parse(moqTemplate))
+	return Template{tmpl: tmpl}
 }
 
 // Execute generates and writes the Moq implementation for the given

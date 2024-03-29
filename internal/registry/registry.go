@@ -28,12 +28,12 @@ type Registry struct {
 // Registry.
 func New(srcDir, moqPkg string) (*Registry, error) {
 	srcPkg, err := pkgInfoFromPath(
-		srcDir, packages.NeedName|packages.NeedSyntax|packages.NeedTypes,
+		srcDir,
+		packages.NeedName|packages.NeedSyntax|packages.NeedTypes,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't load source package: %w", err)
 	}
-
 	return &Registry{
 		srcPkgName:  srcPkg.Name,
 		srcPkgTypes: srcPkg.Types,

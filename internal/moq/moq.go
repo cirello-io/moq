@@ -37,16 +37,10 @@ func New(cfg Config) (*Mocker, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	tmpl, err := template.New()
-	if err != nil {
-		return nil, err
-	}
-
 	return &Mocker{
 		cfg:      cfg,
 		registry: reg,
-		tmpl:     tmpl,
+		tmpl:     template.New(),
 	}, nil
 }
 
