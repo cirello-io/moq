@@ -6,8 +6,10 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 
 	"cirello.io/moq/internal/moq"
 )
@@ -22,100 +24,84 @@ func init() {
 	_ = os.Setenv("GODEBUG", godebug)
 }
 
-const Version string = "dev"
-
 type userFlags struct {
-	outFile    string
-	pkgName    string
-	formatter  string
-	stubImpl   bool
-	skipEnsure bool
-	withResets bool
-	remove     bool
-	args       []string
+	moq.Config
+
+	outFile string
+
+	remove    bool
+	namePairs []string
 }
 
 func main() {
-	var flags userFlags
-	flag.StringVar(&flags.outFile, "out", "", "output file (default stdout)")
-	flag.StringVar(&flags.pkgName, "pkg", "", "package name (default will infer)")
-	flag.StringVar(&flags.formatter, "fmt", "", "go pretty-printer: gofmt, goimports or noop (default gofmt)")
-	flag.BoolVar(&flags.stubImpl, "stub", false,
-		"return zero values when no mock implementation is provided, do not panic")
-	printVersion := flag.Bool("version", false, "show the version for moq")
-	flag.BoolVar(&flags.skipEnsure, "skip-ensure", false,
-		"suppress mock implementation check, avoid import cycle if mocks generated outside of the tested package")
-	flag.BoolVar(&flags.remove, "rm", false, "first remove output file, if it exists")
-	flag.BoolVar(&flags.withResets, "with-resets", false,
-		"generate functions to facilitate resetting calls made to a mock")
+	log.SetPrefix("moq: ")
+	log.SetFlags(0)
 
-	flag.Usage = func() {
-		fmt.Println(`moq [flags] source-dir interface [interface2 [interface3 [...]]]`)
-		flag.PrintDefaults()
-		fmt.Println(`Specifying an alias for the mock is also supported with the format 'interface:alias'`)
-		fmt.Println(`Ex: moq -pkg different . MyInterface:MyMock`)
+	flagset := flag.NewFlagSet("moq", flag.ExitOnError)
+	var flags userFlags
+	flagset.StringVar(&flags.outFile, "out", "", "output file (default stdout)")
+	flagset.StringVar(&flags.Config.PkgName, "pkg", "", "package name (default will infer)")
+	flagset.StringVar(&flags.Config.Formatter, "fmt", "", "go pretty-printer: gofmt, goimports or noop (default gofmt)")
+	flagset.BoolVar(&flags.Config.StubImpl, "stub", false, "return zero values when no mock implementation is provided, do not panic")
+	flagset.BoolVar(&flags.Config.SkipEnsure, "skip-ensure", false, "suppress mock implementation check, avoid import cycle if mocks generated outside of the tested package")
+	flagset.BoolVar(&flags.remove, "rm", false, "first remove output file, if it exists")
+	flagset.BoolVar(&flags.Config.WithResets, "with-resets", false, "generate functions to facilitate resetting calls made to a mock")
+	printVersion := flagset.Bool("version", false, "show the version for moq")
+
+	flagset.Usage = func() {
+		fmt.Fprintln(flagset.Output(), `moq [flags] source-dir interface [interface2 [interface3 [...]]]`)
+		flagset.PrintDefaults()
+		fmt.Fprintln(flagset.Output(), `Specifying an alias for the mock is also supported with the format 'interface:alias'`)
+		fmt.Fprintln(flagset.Output(), `Ex: moq -pkg different . MyInterface:MyMock`)
 	}
 
-	flag.Parse()
-	flags.args = flag.Args()
+	if err := flagset.Parse(os.Args[1:]); err != nil {
+		log.Fatal("cannot parse flags")
+	}
 
 	if *printVersion {
-		fmt.Printf("moq version %s\n", Version)
+		info, ok := debug.ReadBuildInfo()
+		if !ok {
+			log.Fatal("could not read build info")
+		}
+		version := "dev"
+		for _, setting := range info.Settings {
+			if setting.Key == "vcs.revision" {
+				version = setting.Value
+			}
+		}
+		fmt.Printf("moq version %s\n", version)
 		os.Exit(0)
 	}
 
-	if err := run(flags); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		flag.Usage()
-		os.Exit(1)
-	}
-}
-
-func run(flags userFlags) error {
-	if len(flags.args) < 2 {
-		return errors.New("not enough arguments")
+	if len(flagset.Args()) < 2 {
+		log.Fatal("not enough arguments")
 	}
 
-	if flags.remove && flags.outFile != "" {
-		if err := os.Remove(flags.outFile); err != nil {
-			if !errors.Is(err, os.ErrNotExist) {
-				return err
-			}
+	flags.Config.SrcDir = flagset.Arg(0)
+	flags.namePairs = flagset.Args()[1:]
+
+	buf := new(bytes.Buffer)
+	m, err := moq.New(flags.Config)
+	if err != nil {
+		log.Fatalf("cannot begin mock generation: %v", err)
+	}
+	if err := m.Mock(buf, flags.namePairs...); err != nil {
+		log.Fatalf("cannot render mock: %v", err)
+	}
+	if flags.outFile == "" {
+		io.Copy(os.Stdout, buf)
+		return
+	}
+	if flags.remove {
+		if err := os.Remove(flags.outFile); err != nil && !errors.Is(err, os.ErrNotExist) {
+			log.Fatalf("cannot remove %q: %v", flags.outFile, err)
 		}
 	}
-
-	var buf bytes.Buffer
-	var out io.Writer = os.Stdout
-	if flags.outFile != "" {
-		out = &buf
+	if err := os.MkdirAll(filepath.Dir(flags.outFile), 0o750); err != nil {
+		log.Fatalf("cannot create base directory: %v", err)
 	}
-
-	srcDir, args := flags.args[0], flags.args[1:]
-	m, err := moq.New(moq.Config{
-		SrcDir:     srcDir,
-		PkgName:    flags.pkgName,
-		Formatter:  flags.formatter,
-		StubImpl:   flags.stubImpl,
-		SkipEnsure: flags.skipEnsure,
-		WithResets: flags.withResets,
-	})
-	if err != nil {
-		return err
+	if err := os.WriteFile(flags.outFile, buf.Bytes(), 0o600); err != nil {
+		log.Fatalf("cannot store generated mock %q: %v", flags.outFile, err)
 	}
-
-	if err = m.Mock(out, args...); err != nil {
-		return err
-	}
-
-	if flags.outFile == "" {
-		return nil
-	}
-
-	// create the file
-	err = os.MkdirAll(filepath.Dir(flags.outFile), 0o750)
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(flags.outFile, buf.Bytes(), 0o600)
 }

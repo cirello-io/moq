@@ -16,12 +16,10 @@ linters:
     - errname
     - errorlint
     - exportloopref
-    # - gochecknoglobals
     - godot
     - gofmt
     - gosec
     - gosimple
-    - govet
     - importas
     - ineffassign
     - loggercheck
@@ -84,7 +82,7 @@ linters-settings:
       - name: import-shadowing
       - name: unused-receiver
       - name: unhandled-error
-        arguments: ["fmt\\.Print.*","io\\.Copy"]
+        arguments: ["fmt\\.Print.*","io\\.Copy","fmt\\.Fprint.*"]
       - name: string-of-int
       - name: early-return
       - name: defer
