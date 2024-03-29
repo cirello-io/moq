@@ -11,17 +11,12 @@ import (
 	"strings"
 	"testing"
 
+	"cirello.io/moq/internal/typealias"
 	"github.com/google/go-cmp/cmp"
 )
 
 func init() {
-	// Necessary hack to get `go/type` to report type aliases
-	godebug := os.Getenv("GODEBUG")
-	if godebug == "" {
-		godebug += ","
-	}
-	godebug += "gotypesalias=1"
-	_ = os.Setenv("GODEBUG", godebug)
+	typealias.ConfigureGoDebug()
 }
 
 func TestMoq(t *testing.T) {
