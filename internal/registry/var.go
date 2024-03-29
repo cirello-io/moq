@@ -35,7 +35,11 @@ func (v Var) packageQualifier(pkg *types.Package) string {
 		return ""
 	}
 
-	return v.imports[path].Qualifier()
+	if q := v.imports[path].Qualifier(); q != "" {
+		return q
+	}
+
+	return v.vr.Pkg().Name()
 }
 
 func varName(vr *types.Var, suffix string) string {

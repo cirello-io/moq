@@ -420,6 +420,16 @@ func TestMockGolden(t *testing.T) {
 			interfaces: []string{"Doer"},
 			goldenFile: filepath.Join("testpackages/typealias", "typealias_moq.golden.go"),
 		},
+		{
+			name: "InterfaceReturnAlias",
+			cfg: Config{
+				SrcDir:     "testpackages/interfacereturnalias/internal",
+				WithResets: false,
+				PkgName:    "interfacereturnalias",
+			},
+			interfaces: []string{"Doer"},
+			goldenFile: filepath.Join("testpackages/interfacereturnalias", "interfacereturnalias_moq.golden.go"),
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
