@@ -10,7 +10,7 @@ Refer to `example/` for basic usage.
 
 This fork modernize the source code and improve some of its ergonomics. Hopefully, some of these changes will later be merged upstream.
 
-This repository is covered by this [SLA](https://github.com/cirello-io/sla/blob/master/doc.go). If I decide to deprecate this package, I will do maintain for 3 months before archiving it.
+This repository is covered by this [SLA](https://github.com/cirello-io/sla/blob/master/doc.go). If I decide to deprecate this package, I will maintain it for 3 months before archiving it.
 
 ### Usage
 
@@ -61,7 +61,7 @@ Then run `go generate` for your package.
 
 ### How to use it
 
-Mocking interfaces is a nice way to write unit tests where you can easily control the behaviour of the mocked object.
+Mocking interfaces is a nice way to write unit tests where you can easily control the behavior of the mocked object.
 
 Moq creates a struct that has a function field for each method, which you can declare in your test code.
 
@@ -106,7 +106,7 @@ The mocked structure implements the interface, where each method calls the assoc
 * Name arguments in the interface for a better experience
 * Use closured variables inside your test function to capture details about the calls to the methods
 * Use `.MethodCalls()` to track the calls
-* Use `.ResetCalls()` to reset calls within an invidual mock's context
+* Use `.ResetCalls()` to reset calls within an individual mock's context
 * Use `go:generate` to invoke the `moq` command
 * If Moq fails with a `go/format` error, it indicates the generated code was not valid.
   You can run the same command with `-fmt noop` to print the generated source code without attempting to format it.
