@@ -15,7 +15,8 @@ import (
 )
 
 func init() {
-	// Necessary hack to get `go/type` to report type aliases
+	// Necessary hack to get `go/type` to report type aliases. Necessary to
+	// get generics support to work correctly when paired with type aliases.
 	godebug := os.Getenv("GODEBUG")
 	if godebug == "" {
 		godebug += ","

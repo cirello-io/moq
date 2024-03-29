@@ -19,9 +19,9 @@ type Data struct {
 	WithResets      bool
 }
 
-// MocksSomeMethod returns true of any one of the Mocks has at least 1
+// MocksHaveMethod returns true of any one of the Mocks has at least 1
 // method.
-func (d Data) MocksSomeMethod() bool {
+func (d Data) MocksHaveMethod() bool {
 	for _, m := range d.Mocks {
 		if len(m.Methods) > 0 {
 			return true

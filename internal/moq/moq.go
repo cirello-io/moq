@@ -3,6 +3,7 @@ package moq
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"go/token"
 	"go/types"
 	"io"
@@ -52,22 +53,20 @@ func (m *Mocker) Mock(w io.Writer, namePairs ...string) error {
 
 	mocks := make([]template.MockData, len(namePairs))
 	for i, np := range namePairs {
-		name, mockName := parseInterfaceName(np)
-		iface, tparams, err := m.registry.LookupInterface(name)
+		interfaceName, mockName := parseInterfaceName(np)
+		interfaceType, typeParams, err := m.registry.LookupInterface(interfaceName)
 		if err != nil {
 			return err
 		}
-
-		methods := make([]template.MethodData, iface.NumMethods())
-		for j := 0; j < iface.NumMethods(); j++ {
-			methods[j] = m.methodData(iface.Method(j))
+		methods := make([]template.MethodData, interfaceType.NumMethods())
+		for j := 0; j < interfaceType.NumMethods(); j++ {
+			methods[j] = m.methodData(interfaceType.Method(j))
 		}
-
 		mocks[i] = template.MockData{
-			InterfaceName: name,
+			InterfaceName: interfaceName,
 			MockName:      mockName,
 			Methods:       methods,
-			TypeParams:    m.typeParams(tparams),
+			TypeParams:    m.typeParams(typeParams),
 		}
 	}
 
@@ -79,7 +78,7 @@ func (m *Mocker) Mock(w io.Writer, namePairs ...string) error {
 		WithResets: m.cfg.WithResets,
 	}
 
-	if data.MocksSomeMethod() {
+	if data.MocksHaveMethod() {
 		m.registry.AddImport(types.NewPackage("sync", "sync"))
 	}
 	if m.registry.SrcPkgName() != m.mockPkgName() {
@@ -94,12 +93,12 @@ func (m *Mocker) Mock(w io.Writer, namePairs ...string) error {
 
 	var buf bytes.Buffer
 	if err := m.tmpl.Execute(&buf, data); err != nil {
-		return err
+		return fmt.Errorf("cannot render mock template after code analysis: %w", err)
 	}
 
 	formatted, err := m.format(buf.Bytes())
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot run pretty printer on generated code: %w", err)
 	}
 
 	if _, err := w.Write(formatted); err != nil {
@@ -108,17 +107,16 @@ func (m *Mocker) Mock(w io.Writer, namePairs ...string) error {
 	return nil
 }
 
-func (m *Mocker) typeParams(tparams *types.TypeParamList) []template.TypeParamData {
+func (m *Mocker) typeParams(typeParamsList *types.TypeParamList) []template.TypeParamData {
 	var tpd []template.TypeParamData
-	if tparams == nil {
+	if typeParamsList == nil {
 		return tpd
 	}
 
-	tpd = make([]template.TypeParamData, tparams.Len())
-
+	tpd = make([]template.TypeParamData, typeParamsList.Len())
 	scope := m.registry.MethodScope()
 	for i := 0; i < len(tpd); i++ {
-		tp := tparams.At(i)
+		tp := typeParamsList.At(i)
 		typeParam := types.NewParam(token.Pos(i), tp.Obj().Pkg(), tp.Obj().Name(), tp.Constraint())
 		tpd[i] = template.TypeParamData{
 			ParamData:  template.ParamData{Var: scope.AddVar(typeParam, "")},
@@ -147,27 +145,23 @@ func explicitConstraintType(typeParam *types.Var) (t types.Type) {
 
 func (m *Mocker) methodData(f *types.Func) template.MethodData {
 	sig := f.Type().(*types.Signature)
-
 	scope := m.registry.MethodScope()
-	n := sig.Params().Len()
-	params := make([]template.ParamData, n)
-	for i := 0; i < n; i++ {
+	paramsLen := sig.Params().Len()
+	resultsLen := sig.Results().Len()
+	params := make([]template.ParamData, paramsLen)
+	for i := 0; i < paramsLen; i++ {
 		p := template.ParamData{
 			Var: scope.AddVar(sig.Params().At(i), ""),
 		}
-		p.Variadic = sig.Variadic() && i == n-1 && p.Var.IsSlice() // check for final variadic argument
-
+		p.Variadic = sig.Variadic() && i == paramsLen-1 && p.Var.IsSlice() // check for final variadic argument
 		params[i] = p
 	}
-
-	n = sig.Results().Len()
-	results := make([]template.ParamData, n)
-	for i := 0; i < n; i++ {
+	results := make([]template.ParamData, resultsLen)
+	for i := 0; i < resultsLen; i++ {
 		results[i] = template.ParamData{
 			Var: scope.AddVar(sig.Results().At(i), "Out"),
 		}
 	}
-
 	return template.MethodData{
 		Name:    f.Name(),
 		Params:  params,
@@ -179,7 +173,6 @@ func (m *Mocker) mockPkgName() string {
 	if m.cfg.PkgName != "" {
 		return m.cfg.PkgName
 	}
-
 	return m.registry.SrcPkgName()
 }
 
@@ -195,12 +188,10 @@ func (m *Mocker) format(src []byte) ([]byte, error) {
 	return gofmt(src)
 }
 
-func parseInterfaceName(namePair string) (ifaceName, mockName string) {
-	parts := strings.SplitN(namePair, ":", 2)
-	if len(parts) == 2 {
-		return parts[0], parts[1]
+func parseInterfaceName(namePair string) (interfaceName, mockName string) {
+	interfaceName, mockName, found := strings.Cut(namePair, ":")
+	if !found {
+		return interfaceName, interfaceName + "Mock"
 	}
-
-	ifaceName = parts[0]
-	return ifaceName, ifaceName + "Mock"
+	return interfaceName, mockName
 }
