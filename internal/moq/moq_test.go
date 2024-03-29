@@ -442,8 +442,7 @@ func TestFormatter(t *testing.T) {
 		conf Config
 	}{
 		{name: "gofmt", conf: Config{SrcDir: "testpackages/imports/two"}},
-		{name: "goimports", conf: Config{SrcDir: "testpackages/imports/two", Formatter: "goimports"}},
-		{name: "noop", conf: Config{SrcDir: "testpackages/imports/two", Formatter: "noop"}},
+		{name: "disabled", conf: Config{SrcDir: "testpackages/imports/two", Formatter: "disabled"}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

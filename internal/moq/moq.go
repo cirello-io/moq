@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"go/format"
 	"go/token"
 	"go/types"
 	"io"
@@ -96,7 +97,7 @@ func (m *Mocker) Mock(w io.Writer, namePairs ...string) error {
 		return fmt.Errorf("cannot render mock template after code analysis: %w", err)
 	}
 
-	formatted, err := m.format(buf.Bytes())
+	formatted, err := m.formatSource(buf.Bytes())
 	if err != nil {
 		return fmt.Errorf("cannot run pretty printer on generated code: %w", err)
 	}
@@ -176,16 +177,15 @@ func (m *Mocker) mockPkgName() string {
 	return m.registry.SrcPkgName()
 }
 
-func (m *Mocker) format(src []byte) ([]byte, error) {
-	switch m.cfg.Formatter {
-	case "goimports":
-		return goimports(src)
-
-	case "noop":
+func (m *Mocker) formatSource(src []byte) ([]byte, error) {
+	if m.cfg.Formatter == "disabled" {
 		return src, nil
 	}
-
-	return gofmt(src)
+	formatted, err := format.Source(src)
+	if err != nil {
+		return nil, fmt.Errorf("go/format: %w", err)
+	}
+	return formatted, nil
 }
 
 func parseInterfaceName(namePair string) (interfaceName, mockName string) {

@@ -8,16 +8,16 @@ import (
 	"sync"
 )
 
-// Ensure, that noopMock does implement DoSomething.
+// Ensure, that disabledMock does implement DoSomething.
 // If this is not the case, regenerate this file with moq.
-var _ DoSomething = &noopMock{}
+var _ DoSomething = &disabledMock{}
 
-// noopMock is a mock implementation of DoSomething.
+// disabledMock is a mock implementation of DoSomething.
 //
 //	func TestSomethingThatUsesDoSomething(t *testing.T) {
 //
 //		// make and configure a mocked DoSomething
-//		mockedDoSomething := &noopMock{
+//		mockedDoSomething := &disabledMock{
 //			AnotherFunc: func(thing one.Thing) error {
 //				panic("mock out the Another method")
 //			},
@@ -30,7 +30,7 @@ var _ DoSomething = &noopMock{}
 //		// and then make assertions.
 //
 //	}
-type noopMock struct {
+type disabledMock struct {
 	// AnotherFunc mocks the Another method.
 	AnotherFunc func(thing one.Thing) error
 
@@ -55,9 +55,9 @@ type noopMock struct {
 }
 
 // Another calls AnotherFunc.
-func (mock *noopMock) Another(thing one.Thing) error {
+func (mock *disabledMock) Another(thing one.Thing) error {
 	if mock.AnotherFunc == nil {
-		panic("noopMock.AnotherFunc: method is nil but DoSomething.Another was just called")
+		panic("disabledMock.AnotherFunc: method is nil but DoSomething.Another was just called")
 	}
 	callInfo := struct {
 		Thing one.Thing
@@ -74,7 +74,7 @@ func (mock *noopMock) Another(thing one.Thing) error {
 // Check the length with:
 //
 //	len(mockedDoSomething.AnotherCalls())
-func (mock *noopMock) AnotherCalls() []struct {
+func (mock *disabledMock) AnotherCalls() []struct {
 		Thing one.Thing
 	} {
 	var calls []struct {
@@ -87,9 +87,9 @@ func (mock *noopMock) AnotherCalls() []struct {
 }
 
 // Do calls DoFunc.
-func (mock *noopMock) Do(thing one.Thing) error {
+func (mock *disabledMock) Do(thing one.Thing) error {
 	if mock.DoFunc == nil {
-		panic("noopMock.DoFunc: method is nil but DoSomething.Do was just called")
+		panic("disabledMock.DoFunc: method is nil but DoSomething.Do was just called")
 	}
 	callInfo := struct {
 		Thing one.Thing
@@ -106,7 +106,7 @@ func (mock *noopMock) Do(thing one.Thing) error {
 // Check the length with:
 //
 //	len(mockedDoSomething.DoCalls())
-func (mock *noopMock) DoCalls() []struct {
+func (mock *disabledMock) DoCalls() []struct {
 		Thing one.Thing
 	} {
 	var calls []struct {

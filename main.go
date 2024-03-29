@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"slices"
+	"strings"
 
 	"cirello.io/moq/internal/moq"
 	"cirello.io/moq/internal/typealias"
@@ -31,12 +33,15 @@ type userFlags struct {
 func main() {
 	log.SetPrefix("moq: ")
 	log.SetFlags(0)
+	debugFlags := strings.Split(",", strings.ToLower(os.Getenv("MOQ_DEBUG")))
 
 	flagset := flag.NewFlagSet("moq", flag.ExitOnError)
 	var flags userFlags
 	flagset.StringVar(&flags.outFile, "out", "", "output file (default stdout)")
 	flagset.StringVar(&flags.Config.PkgName, "pkg", "", "package name (default will infer)")
-	flagset.StringVar(&flags.Config.Formatter, "fmt", "", "go pretty-printer: gofmt, goimports or noop (default gofmt)")
+	if slices.Contains(debugFlags, "disableFormat") {
+		flags.Config.Formatter = "disabled"
+	}
 	flagset.BoolVar(&flags.Config.StubImpl, "stub", false, "return zero values when no mock implementation is provided, do not panic")
 	flagset.BoolVar(&flags.Config.SkipEnsure, "skip-ensure", false, "suppress mock implementation check, avoid import cycle if mocks generated outside of the tested package")
 	flagset.BoolVar(&flags.remove, "rm", false, "first remove output file, if it exists")
