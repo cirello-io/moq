@@ -496,7 +496,7 @@ func TestVendoredPackages(t *testing.T) {
 	s := buf.String()
 	// assertions of things that should be mentioned
 	strs := []string{
-		`"github.com/sudo-suhas/moq-test-pkgs/somerepo"`,
+		`"github.com/cirello-io/moq-test-pkgs/somerepo"`,
 	}
 	for _, str := range strs {
 		if !strings.Contains(s, str) {
@@ -507,7 +507,7 @@ func TestVendoredPackages(t *testing.T) {
 
 func TestVendoredInterface(t *testing.T) {
 	m, err := New(Config{
-		SrcDir:  "testpackages/vendoring/vendor/github.com/sudo-suhas/moq-test-pkgs/somerepo",
+		SrcDir:  "testpackages/vendoring/vendor/github.com/cirello-io/moq-test-pkgs/somerepo",
 		PkgName: "someother",
 	})
 	if err != nil {
@@ -521,14 +521,14 @@ func TestVendoredInterface(t *testing.T) {
 	s := buf.String()
 	// assertions of things that should be mentioned
 	strs := []string{
-		`"github.com/sudo-suhas/moq-test-pkgs/somerepo"`,
+		`"github.com/cirello-io/moq-test-pkgs/somerepo"`,
 	}
 	for _, str := range strs {
 		if !strings.Contains(s, str) {
 			t.Errorf("expected but missing: \"%s\"", str)
 		}
 	}
-	incorrectImport := `"cirello.io/moq/pkg/moq/testpackages/vendoring/vendor/github.com/sudo-suhas/moq-test-pkgs/somerepo"`
+	incorrectImport := `"cirello.io/moq/pkg/moq/testpackages/vendoring/vendor/github.com/cirello-io/moq-test-pkgs/somerepo"`
 	if strings.Contains(s, incorrectImport) {
 		t.Errorf("unexpected import: %s", incorrectImport)
 	}
@@ -547,7 +547,7 @@ func TestVendoredBuildConstraints(t *testing.T) {
 	s := buf.String()
 	// assertions of things that should be mentioned
 	strs := []string{
-		`"github.com/sudo-suhas/moq-test-pkgs/buildconstraints"`,
+		`"github.com/cirello-io/moq-test-pkgs/buildconstraints"`,
 	}
 	for _, str := range strs {
 		if !strings.Contains(s, str) {
@@ -654,7 +654,7 @@ func TestParseError(t *testing.T) {
 		return
 	}
 	// The first clause is the common error. Only in go version 1.19.10 the error differs
-	if !strings.Contains(err.Error(), `could not import github.com/matryer/notexist (invalid package name: "")`) && !strings.Contains(err.Error(), "stderr: go build github.com/matryer/notexist") {
+	if !strings.Contains(err.Error(), `could not import github.com/cirello-io/notexist (invalid package name: "")`) && !strings.Contains(err.Error(), "stderr: go build github.com/cirello-io/notexist") {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
 }

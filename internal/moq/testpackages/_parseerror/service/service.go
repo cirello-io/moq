@@ -1,6 +1,6 @@
 package service
 
-import "github.com/matryer/notexist"
+import "github.com/cirello-io/notexist"
 
 // Service does something good with computers.
 type Service interface {

@@ -1,6 +1,6 @@
 package user
 
-import "github.com/sudo-suhas/moq-test-pkgs/somerepo"
+import "github.com/cirello-io/moq-test-pkgs/somerepo"
 
 // Service does something good with computers.
 type Service interface {

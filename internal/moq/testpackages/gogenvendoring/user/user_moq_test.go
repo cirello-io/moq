@@ -4,7 +4,7 @@
 package user
 
 import (
-	"github.com/sudo-suhas/moq-test-pkgs/somerepo"
+	"github.com/cirello-io/moq-test-pkgs/somerepo"
 	"sync"
 )
 

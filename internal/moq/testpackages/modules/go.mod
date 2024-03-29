@@ -1,1 +1,1 @@
-module github.com/matryer/modules
+module cirello.io/moq/modules

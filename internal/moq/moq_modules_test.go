@@ -50,7 +50,6 @@ func copyFile(srcPath, destPath string, item os.FileInfo) error {
 	return nil
 }
 
-// copyTestPackage copies test package to a temporary directory.
 func copyTestPackage(srcPath string) (string, error) {
 	tmpDir, err := os.MkdirTemp("", "moq-tests")
 	if err != nil {
@@ -81,7 +80,7 @@ func TestModulesSamePackage(t *testing.T) {
 		t.Errorf("m.Mock: %s", err)
 	}
 	s := buf.String()
-	if strings.Contains(s, `github.com/matryer/modules`) {
+	if strings.Contains(s, `cirello.io/moq/modules`) {
 		t.Errorf("should not have cyclic dependency")
 	}
 	// assertions of things that should be mentioned
@@ -116,7 +115,7 @@ func TestModulesNestedPackage(t *testing.T) {
 	// assertions of things that should be mentioned
 	var strs = []string{
 		"package nested",
-		"github.com/matryer/modules",
+		"cirello.io/moq/modules",
 		"var _ simple.Foo = &FooMock{}",
 		"type FooMock struct",
 		"func (mock *FooMock) FooIt(bar *simple.Bar) {",
