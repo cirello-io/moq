@@ -18,7 +18,6 @@ import (
 )
 
 func main() {
-	typealias.ConfigureGoDebug()
 	log.SetPrefix("moq: ")
 	log.SetFlags(0)
 	debugFlags := strings.Split(",", strings.ToLower(os.Getenv("MOQ_DEBUG")))
@@ -33,6 +32,7 @@ func main() {
 	flagset.BoolVar(&moqCfg.StubImpl, "stub", false, "return zero values when no mock implementation is provided, do not panic")
 	flagset.BoolVar(&moqCfg.SkipEnsure, "skip-ensure", false, "suppress check that confirms a mock implements an interface, avoid import cycle if mocks generated outside of the tested package")
 	remove := flagset.Bool("rm", false, "first remove output file, if it exists")
+	typeAlias := flagset.Bool("typealias", false, "enable type alias support inside generics. (gotypesalias=1)")
 	flagset.BoolVar(&moqCfg.WithResets, "with-resets", false, "generate functions to facilitate resetting calls made to a mock")
 	printVersion := flagset.Bool("version", false, "show the version for moq")
 
@@ -45,6 +45,10 @@ func main() {
 
 	if err := flagset.Parse(os.Args[1:]); err != nil {
 		log.Fatal("cannot parse flags")
+	}
+
+	if *typeAlias {
+		typealias.ConfigureGoDebug()
 	}
 
 	if *printVersion {

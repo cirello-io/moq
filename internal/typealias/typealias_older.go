@@ -9,5 +9,6 @@ import (
 )
 
 func ConfigureGoDebug() {
-	fmt.Fprintln(os.Stderr, "only partial generics and type alias support")
+	fmt.Fprintln(os.Stderr, "type alias inside generics support only available in Go 1.22+")
+	os.Exit(1)
 }
