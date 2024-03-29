@@ -15,8 +15,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func init() {
+func TestMain(m *testing.M) {
 	typealias.ConfigureGoDebug()
+	os.Exit(m.Run())
 }
 
 func TestMoq(t *testing.T) {

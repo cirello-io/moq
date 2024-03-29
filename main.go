@@ -17,35 +17,23 @@ import (
 	"cirello.io/moq/internal/typealias"
 )
 
-func init() {
-	typealias.ConfigureGoDebug()
-}
-
-type userFlags struct {
-	moq.Config
-
-	outFile string
-
-	remove    bool
-	namePairs []string
-}
-
 func main() {
+	typealias.ConfigureGoDebug()
 	log.SetPrefix("moq: ")
 	log.SetFlags(0)
 	debugFlags := strings.Split(",", strings.ToLower(os.Getenv("MOQ_DEBUG")))
 
 	flagset := flag.NewFlagSet("moq", flag.ExitOnError)
-	var flags userFlags
-	flagset.StringVar(&flags.outFile, "out", "", "output file (default stdout)")
-	flagset.StringVar(&flags.Config.PkgName, "pkg", "", "package name (default will infer)")
+	var moqCfg moq.Config
+	outfile := flagset.String("out", "", "output file (default stdout)")
+	flagset.StringVar(&moqCfg.PkgName, "pkg", "", "package name (default will infer)")
 	if slices.Contains(debugFlags, "disableFormat") {
-		flags.Config.Formatter = "disabled"
+		moqCfg.Formatter = "disabled"
 	}
-	flagset.BoolVar(&flags.Config.StubImpl, "stub", false, "return zero values when no mock implementation is provided, do not panic")
-	flagset.BoolVar(&flags.Config.SkipEnsure, "skip-ensure", false, "suppress mock implementation check, avoid import cycle if mocks generated outside of the tested package")
-	flagset.BoolVar(&flags.remove, "rm", false, "first remove output file, if it exists")
-	flagset.BoolVar(&flags.Config.WithResets, "with-resets", false, "generate functions to facilitate resetting calls made to a mock")
+	flagset.BoolVar(&moqCfg.StubImpl, "stub", false, "return zero values when no mock implementation is provided, do not panic")
+	flagset.BoolVar(&moqCfg.SkipEnsure, "skip-ensure", false, "suppress check that confirms a mock implements an interface, avoid import cycle if mocks generated outside of the tested package")
+	remove := flagset.Bool("rm", false, "first remove output file, if it exists")
+	flagset.BoolVar(&moqCfg.WithResets, "with-resets", false, "generate functions to facilitate resetting calls made to a mock")
 	printVersion := flagset.Bool("version", false, "show the version for moq")
 
 	flagset.Usage = func() {
@@ -78,30 +66,30 @@ func main() {
 		log.Fatal("not enough arguments")
 	}
 
-	flags.Config.SrcDir = flagset.Arg(0)
-	flags.namePairs = flagset.Args()[1:]
+	moqCfg.SrcDir = flagset.Arg(0)
+	namePairs := flagset.Args()[1:]
 
 	buf := new(bytes.Buffer)
-	m, err := moq.New(flags.Config)
+	m, err := moq.New(moqCfg)
 	if err != nil {
 		log.Fatalf("cannot begin mock generation: %v", err)
 	}
-	if err := m.Mock(buf, flags.namePairs...); err != nil {
+	if err := m.Mock(buf, namePairs...); err != nil {
 		log.Fatalf("cannot render mock: %v", err)
 	}
-	if flags.outFile == "" {
+	if *outfile == "" {
 		io.Copy(os.Stdout, buf)
 		return
 	}
-	if flags.remove {
-		if err := os.Remove(flags.outFile); err != nil && !errors.Is(err, os.ErrNotExist) {
-			log.Fatalf("cannot remove %q: %v", flags.outFile, err)
+	if *remove {
+		if err := os.Remove(*outfile); err != nil && !errors.Is(err, os.ErrNotExist) {
+			log.Fatalf("cannot remove %q: %v", *outfile, err)
 		}
 	}
-	if err := os.MkdirAll(filepath.Dir(flags.outFile), 0o750); err != nil {
+	if err := os.MkdirAll(filepath.Dir(*outfile), 0o750); err != nil {
 		log.Fatalf("cannot create base directory: %v", err)
 	}
-	if err := os.WriteFile(flags.outFile, buf.Bytes(), 0o600); err != nil {
-		log.Fatalf("cannot store generated mock %q: %v", flags.outFile, err)
+	if err := os.WriteFile(*outfile, buf.Bytes(), 0o600); err != nil {
+		log.Fatalf("cannot store generated mock %q: %v", *outfile, err)
 	}
 }
