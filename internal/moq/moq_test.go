@@ -199,6 +199,10 @@ func TestMoqSkipEnsure(t *testing.T) {
 			t.Errorf("expected but missing: \"%s\"", str)
 		}
 	}
+	const ensureCode = "var _ example.PersonStore"
+	if strings.Contains(s, ensureCode) {
+		t.Errorf("unexpected and present: \"%s\"", ensureCode)
+	}
 }
 
 func TestNotCreatingEmptyDirWhenPkgIsGiven(t *testing.T) {
