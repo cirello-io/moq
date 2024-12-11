@@ -78,13 +78,6 @@ func stripVendorPath(p string) string {
 	return strings.TrimLeft(path.Join(parts[1:]...), "/")
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 func reverse(a []string) {
 	for i := len(a)/2 - 1; i >= 0; i-- {
 		opp := len(a) - 1 - i
