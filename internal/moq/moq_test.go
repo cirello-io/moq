@@ -11,14 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"cirello.io/moq/internal/typealias"
 	"github.com/google/go-cmp/cmp"
 )
-
-func TestMain(m *testing.M) {
-	typealias.ConfigureGoDebug()
-	os.Exit(m.Run())
-}
 
 func TestMoq(t *testing.T) {
 	m, err := New(Config{SrcDir: "testpackages/example"})

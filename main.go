@@ -14,11 +14,9 @@ import (
 	"strings"
 
 	"cirello.io/moq/internal/moq"
-	"cirello.io/moq/internal/typealias"
 )
 
 func main() {
-	typealias.ConfigureGoDebug()
 	log.SetPrefix("moq: ")
 	log.SetFlags(0)
 	debugFlags := strings.Split(",", strings.ToLower(os.Getenv("MOQ_DEBUG")))

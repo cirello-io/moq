@@ -53,6 +53,6 @@ jobs:
 
       - uses: golangci/golangci-lint-action@v4
         with:
-          version: "v1.54.1"
+          version: "v1.62.2"
           skip-pkg-cache: true
           args: --max-same-issues=0 --out-format=tab --config=./.golangci.yml
